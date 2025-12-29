@@ -17,6 +17,23 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: 'latest-stable'
+          
+      - name: Patch Code for iOS 16 Compatibility
+        run: |
+          echo "Patching iOS 17 specific code..."
+          
+          # 1. 移除 scrollTargetBehavior (AppStoreApp.swift)
+          sed -i '' 's/\.scrollTargetBehavior(.viewAligned)//g' iOS/AppStoreApp.swift
+          
+          # 2. 修复 .tertiary 颜色问题 (EmailApp.swift, SettingsApp.swift)
+          # 将 .foregroundColor(.tertiary) 替换为 .opacity(0.3) 模拟效果
+          find iOS -name "*.swift" -exec sed -i '' 's/\.foregroundColor(.tertiary)/.opacity(0.4)/g' {} +
+          
+          # 3. 修复 MessagesApp.swift 中的多参数 foregroundColor
+          # 将 .foregroundColor(.white, .blue) 简化为 .foregroundColor(.white)
+          sed -i '' 's/\.foregroundColor(.white, .blue)/.foregroundColor(.white)/g' iOS/MessagesApp.swift
+          
+          echo "Patching complete."
 
       - name: Build for Simulator (Unsigned)
         run: |
